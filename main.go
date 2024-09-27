@@ -10,7 +10,37 @@ import (
 	"example.com/structPractice/todo"
 )
 
+type saver interface {
+	Save() error
+}
+
+type outputable interface {
+	saver
+	Display()
+}
+
+func printSomething(value any) {
+
+	typedVal, ok := value.(int)
+
+	fmt.Println(typedVal)
+	fmt.Println(ok)
+
+	switch value.(type) {
+	case int:
+		fmt.Println("Integer: ", value)
+	case string:
+		fmt.Println("String: ", value)
+	default:
+		fmt.Print("Other")
+	}
+}
+
 func main() {
+	printSomething(1)
+
+	printSomething("Hooo")
+
 	title, content := getNoteData()
 
 	todoText := getUserInput("Todo text: ")
@@ -29,21 +59,36 @@ func main() {
 		return
 	}
 
-	todo.Display()
-	err = todo.Save()
+	err = outputData(todo)
 
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	userNote.Display()
-	err = userNote.Save()
+	err = outputData(userNote)
 
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
+}
+
+func outputData(data outputable) error {
+
+	data.Display()
+	return saveData(data)
+}
+
+func saveData(data saver) error {
+	err := data.Save()
+
+	if err != nil {
+		fmt.Println(err)
+		return err
+	}
+
+	return nil
 }
 
 func getTodoData() string {
